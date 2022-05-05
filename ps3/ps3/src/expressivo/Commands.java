@@ -5,6 +5,18 @@ package expressivo;
 
 import java.util.Map;
 
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
+import expressivo.Expression.MakeExpression;
+import expressivo.parser.ExpressionLexer;
+import expressivo.parser.ExpressionParser;
+
 /**
  * String-based commands provided by the expression system.
  * 
@@ -23,8 +35,12 @@ public class Commands {
      *         to the derivative, but doesn't need to be in simplest or canonical form.
      * @throws IllegalArgumentException if the expression or variable is invalid
      */
-    public static String differentiate(String expression, String variable) {
-        throw new RuntimeException("unimplemented");
+    public static String differentiate(String expression, String variable) throws IllegalArgumentException{
+        try {
+            return Expression.parse(expression).diff(variable).toString();
+        } catch(ParseCancellationException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
     
     /**
@@ -39,8 +55,12 @@ public class Commands {
      *         Additional simplifications to the expression may be done at the implementor's discretion.
      * @throws IllegalArgumentException if the expression is invalid
      */
-    public static String simplify(String expression, Map<String,Double> environment) {
-        throw new RuntimeException("unimplemented");
+    public static String simplify(String expression, Map<String,Double> environment) throws IllegalArgumentException{
+        try {
+            return Expression.parse(expression).simplify(environment).toString();
+        } catch(ParseCancellationException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
     
 }

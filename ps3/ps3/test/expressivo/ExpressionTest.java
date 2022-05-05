@@ -5,6 +5,9 @@ package expressivo;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
 /**
@@ -49,7 +52,22 @@ public class ExpressionTest {
     //   Partition on hashCode():
     //   return same value for same equals() expression
     //   test to five decimal places
-    
+    //
+    //   Partition on diff():
+    //   differentiate on constant
+    //   differentiate on self
+    //   differentiate on other varianble
+    //   differentiate on plus
+    //   differentiate on multiply
+    //
+    //   Partition one simplify():
+    //   single number
+    //   two number multiply and add
+    //   single variable with no specification
+    //   single variable with specification
+    //   two variables, one has value
+    //   two variables, no one has value
+    //   two variables, both have value
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
@@ -82,7 +100,7 @@ public class ExpressionTest {
     public void testDecimalPositiveInteger() {
         Expression test = Expression.parse("42.00000");
         assertNotNull("expected not null", test);
-        assertEquals("expected string format", "42.00000", test.toString());
+        assertEquals("expected string format", "42.0", test.toString());
     }
     
     //covers
@@ -132,7 +150,7 @@ public class ExpressionTest {
         Expression test1 = Expression.parse("(3+4) + 5");
         Expression test2 = Expression.parse("(3+4 + 5)");
         assertNotNull("expected not null", test);
-        assertEquals("expected string format", "0.0 + 0.0 + 1.0", test.toString());
+        assertEquals("expected string format", "( 0.0 + 0.0 + 1.0 )", test.toString());
         assertTrue("expected equals", test1.equals(test2));
         
     }
@@ -143,7 +161,7 @@ public class ExpressionTest {
     public void testSingleMultiply() {
         Expression test = Expression.parse("5 * 6");
         assertNotNull("expected not null", test);
-        assertEquals("expected string format", "(5) * (6)", test.toString());
+        assertEquals("expected string format", "(5.0 * 6.0)", test.toString());
     }
     
     //covers:
@@ -152,7 +170,7 @@ public class ExpressionTest {
     public void testMultipleMultiply() {
         Expression test = Expression.parse("5 * 6*7");
         assertNotNull("expected not null", test);
-        assertEquals("expected string format", "((5) * (6)) * (7)", test.toString());
+        assertEquals("expected string format", "((5.0 * 6.0) * 7.0)", test.toString());
     }
     
     //covers:
@@ -160,7 +178,7 @@ public class ExpressionTest {
     @Test
     public void testEmptyExpression() {
         assertNotNull("expected not null", empty);
-        assertEquals("expected string format", "", empty.toString());
+        assertEquals("expected string format", "0.0", empty.toString());
     }
     
     //covers:
@@ -169,10 +187,10 @@ public class ExpressionTest {
     public void testAllVariants() {
         Expression test = Expression.parse("3+5*6");
         assertNotNull("expected not null", test);
-        assertEquals("expected string format", "3 + ((5) * (6))", test.toString());
+        assertEquals("expected string format", "3.0 + (5.0 * 6.0)", test.toString());
         Expression test1 = Expression.parse("(3 + 5)*6");
         assertNotNull("expected not null", test1);
-        assertEquals("expected string format", "(3 + 5) * (6)", test1.toString());
+        assertEquals("expected string format", "(( 3.0 + 5.0 ) * 6.0)", test1.toString());
     }
     
     //covers:
@@ -186,6 +204,8 @@ public class ExpressionTest {
         Expression test4 = Expression.parse("(1) + (x)");
         Expression test5 = Expression.parse("x + 1");
         //structural
+        System.out.println(test1.toString());
+        System.out.println(test4.toString());
         assertTrue("expected equals", test1.equals(test2));
         assertTrue("expected equals", test1.equals(test3));
         assertTrue("expected equals", test1.equals(test4));
@@ -239,5 +259,112 @@ public class ExpressionTest {
         Expression test = Expression.parse("1.01");
         Expression test1 = Expression.parse("1.01000");
         assertEquals("expected equals", test.hashCode(), test1.hashCode());
+    }
+    
+    //Test for diff():
+    //covers:
+    //differentiate on constant
+    @Test
+    public void testDiffConstant() {
+        Expression test = Expression.parse("x");
+        assertEquals("expected diff result", "0.0", test.diff("3").toString());
+    }
+    
+    //covers:
+    // differentiate on self
+    @Test
+    public void testDiffSelf() {
+        Expression test =  Expression.parse("x");
+        assertEquals("expected diff result", "1.0", test.diff("x").toString());
+    }
+    
+    //covers:
+    //   differentiate on other variable
+    @Test
+    public void testDiffOther() {
+        Expression test =  Expression.parse("x");
+        assertEquals("expected diff result", "0.0", test.diff("y").toString());
+    }
+    
+    //covers:
+    //  differentiate on plus
+    @Test
+    public void testDiffPlus() {
+        Expression test =  Expression.parse("2*x + 3*x");
+        assertEquals("expected diff result", "(2.0 * 1.0) + (x * 0.0) + (3.0 * 1.0) + (x * 0.0)", test.diff("x").toString());
+    }
+    
+    //covers:
+    //   differentiate on multiply
+    @Test
+    public void testDiffMul() {
+        Expression test =  Expression.parse("x*x");
+        assertEquals("expected diff result", "(x * 1.0) + (x * 1.0)", test.diff("x").toString());
+    }
+    
+    //covers:
+    //  single number
+    @Test
+    public void testSimSingleNumber() {
+        Expression test =  Expression.parse("5");
+        Map<String, Double> env = new HashMap<String, Double>();
+        assertEquals("Expected simplification", "5.0", test.simplify(env).toString());
+    }
+    //covers
+   //   two number multiply and add
+    @Test
+    public void testSimTwoNumber() {
+        Expression test =  Expression.parse("5*6 + 5");
+        Map<String, Double> env = new HashMap<String, Double>();
+        assertEquals("Expected simplification", "35.0", test.simplify(env).toString());
+    }
+    
+    //covers
+   //   single variable with no specification
+    @Test
+    public void testSimSingleVar() {
+        Expression test =  Expression.parse("x");
+        Map<String, Double> env = new HashMap<String, Double>();
+        assertEquals("Expected simplification", "x", test.simplify(env).toString());
+    }
+    
+    //covers
+   //   single variable with specification
+    @Test
+    public void testSimSingleVarSpec() {
+        Expression test =  Expression.parse("x");
+        Map<String, Double> env = new HashMap<String, Double>();
+        env.put("x", 42.0);
+        assertEquals("Expected simplification", "42.0", test.simplify(env).toString());
+    }
+    
+    //covers
+    //  two variables, one has value
+    @Test
+    public void testSimTwoVar() {
+        Expression test =  Expression.parse("x + x*y");
+        Map<String, Double> env = new HashMap<String, Double>();
+        env.put("x", 42.0);
+        assertEquals("Expected simplification", "(y * 42.0) + 42.0", test.simplify(env).toString());
+    }
+   
+    //covers
+   //   two variables, no one has value
+    @Test
+    public void testSimTwoVarSpec() {
+        Expression test = Expression.parse("x + x*y");
+        Map<String, Double> env = new HashMap<String, Double>();
+        assertEquals("Expected simplification", "x + (x * y)", test.simplify(env).toString());
+    }
+    
+    //covers
+   //   two variables, both have value
+    @Test
+    public void testSimTwoBothSpec() {
+        Expression test = Expression.parse("x + x*y");
+        Map<String, Double> env = new HashMap<String, Double>();
+        env.put("x", 42.0);
+        env.put("y", 2.0);
+        assertEquals("Expected simplification", "126.0", test.simplify(env).toString());
     }
 }

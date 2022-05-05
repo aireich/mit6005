@@ -1,5 +1,7 @@
 package expressivo;
 
+import java.util.Map;
+
 /**
  * Representing a case-sensitive variable in an expression
  *
@@ -47,5 +49,45 @@ public class Variable implements Expression {
     @Override
     public int hashCode() {
         return name.hashCode();
+    }
+
+    @Override
+    public Expression diff(String input) {
+        if (input.equals(toString())) {
+            return new Number("1");
+        }
+        checkRep();
+        return new Number("0");
+    }
+
+    @Override
+    public Expression simplify(Map<String, Double> env) {
+        assert env != null;
+        if (env.keySet().contains(name)) {
+            checkRep();
+            return new Number(env.get(name));
+        } else {
+            return this;
+        }
+    }
+
+    @Override
+    public Expression timeCoefficient(double num) {
+        return new Multiply(this, new Number(num));
+    }
+
+    @Override
+    public Expression addCoefficient(double num) {
+        return new Plus(this, new Number(num));
+    }
+
+    @Override
+    public Expression addBy(Expression e) {
+        return new Plus(this, e);
+    }
+
+    @Override
+    public Expression timeBy(Expression e) {
+        return new Multiply(this, e);
     }
 }

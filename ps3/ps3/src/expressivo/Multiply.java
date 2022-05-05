@@ -1,4 +1,7 @@
 package expressivo;
+
+import java.util.Map;
+
 /**
  * An multiplication expression
  *
@@ -35,10 +38,11 @@ public class Multiply implements Expression {
     public boolean equals(Object thatObject) {
         if (thatObject == this) {
             return true;
-        } else if (!(thatObject instanceof Multiply)) {
+        } else if (!(thatObject instanceof Multiply) && !(thatObject instanceof Group)) {
             return false;
         }else {
-            return left.toString().equals(right.toString());
+            checkRep();
+            return this.toString().equals(thatObject.toString());
         }
     }
     
@@ -47,4 +51,33 @@ public class Multiply implements Expression {
         return left.hashCode() * 31 + right.hashCode() * 31;
     }
 
+    @Override
+    public Expression diff(String input) {
+        return new Plus(new Multiply(left, right.diff(input)), new Multiply(right, left.diff(input)));
+    }
+
+    @Override
+    public Expression simplify(Map<String, Double> env) {
+        return left.simplify(env).timeBy(right.simplify(env));
+    }
+
+    @Override
+    public Expression timeCoefficient(double num) {
+        return new Multiply(this, new Number(num));
+    }
+
+    @Override
+    public Expression addCoefficient(double num) {
+        return new Plus(this, new Number(num));
+    }
+
+    @Override
+    public Expression addBy(Expression e) {
+        return new Plus(this, e);
+    }
+
+    @Override
+    public Expression timeBy(Expression e) {
+        return new Multiply(this, e);
+    }
 }

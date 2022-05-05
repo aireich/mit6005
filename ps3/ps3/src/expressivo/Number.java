@@ -1,5 +1,7 @@
 package expressivo;
 
+import java.util.Map;
+
 /**
  * A non-negative decimal number
  *
@@ -22,6 +24,10 @@ public class Number implements Expression{
         this.value = Double.parseDouble(value);
     }
     
+    public Number(double value) {
+        this.value = value;
+    }
+    
     private void checkRep() {
         assert value >= 0 && value <= Double.MAX_VALUE;
     }
@@ -40,8 +46,10 @@ public class Number implements Expression{
         } else {
             double that = Double.parseDouble(thatObject.toString());
             if (-0.00001 <= that - value && that - value <= 0.00001) {
+                checkRep();
                 return true;
             } else {
+                checkRep();
                 return false;
             }
         }
@@ -51,5 +59,35 @@ public class Number implements Expression{
     @Override
     public int hashCode() {
         return Integer.hashCode((int) value);
+    }
+
+    @Override
+    public Expression diff(String input) {
+        return new Number("0");
+    }
+    
+    @Override
+    public Expression timeCoefficient(double num) {
+        return new Number(value * num);
+    }
+    
+    @Override
+    public Expression addCoefficient(double num) {
+        return new Number(value + num);
+    }
+
+    @Override
+    public Expression simplify(Map<String, Double> env) {
+        return this;
+    }
+
+    @Override
+    public Expression addBy(Expression e) {
+        return e.addCoefficient(value);
+    }
+
+    @Override
+    public Expression timeBy(Expression e) {
+        return e.timeCoefficient(value);
     }
 }

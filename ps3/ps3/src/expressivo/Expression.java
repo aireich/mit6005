@@ -4,6 +4,7 @@
 package expressivo;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.antlr.v4.gui.Trees;
@@ -63,10 +64,10 @@ public interface Expression {
             ParseTree tree = parser.expr();
             
          // *** Debugging option #1: print the tree to the console
-            System.err.println(tree.toStringTree(parser));
+//            System.err.println(tree.toStringTree(parser));
 
             // *** Debugging option #2: show the tree in a window
-            Trees.inspect(tree, parser);
+//            Trees.inspect(tree, parser);
             MakeExpression exprMaker = new MakeExpression();
             new ParseTreeWalker().walk(exprMaker, tree);
             return exprMaker.getExpression();
@@ -104,7 +105,52 @@ public interface Expression {
      */
     @Override
     public int hashCode();
-
+    
+    /**
+     * @param input should have the same format as Variable
+     * @return the derivative of this expression with respect to input string expression 
+     */
+    public Expression diff(String input);
+    
+    /**
+     * simplify this Expression to the simplest format by using given environment
+     * @param env A map for variables and their value
+     * @return simplest Expression
+     */
+    public Expression simplify(Map<String, Double> env);
+    
+    /**
+     * define the behavior when another Expression add this Expression
+     * @param e another Expression need to be added
+     * @return Expression added
+     */
+    // the main purpose is to use this method combined with addCoefficient() in Number Expression to realize two Number
+    // added. In other Expression, this method will act the same as new Plus(.., ..)
+    public Expression addBy(Expression e); 
+    
+    /**
+     * define the behavior when another Expression times this Expression
+     * @param e another Expression need to be timed
+     * @return Expression timed
+     */
+    // the main purpose is to use this method combined with timeCoefficient() in Number Expression to realize two Number
+    // timed. In other Expression, this method will act the same as new Multiply(.., ..)
+    public Expression timeBy(Expression e);
+    
+    /**
+     * times a coefficient 
+     * @param num coefficient as double type
+     * @return the result of this expression times a coefficient
+     */
+    public Expression timeCoefficient(double num);
+    
+    /**
+     * add a coefficient 
+     * @param num coefficient as double type
+     * @return the result of this expression adds a coefficient
+     */
+    public Expression addCoefficient(double num);
+    
     
     // TODO more instance methods
     class MakeExpression implements ExpressionListener {
@@ -165,7 +211,7 @@ public interface Expression {
             assert adds.size() > 0;
             Expression sum = stack.pop();
             for (int i = 1; i < adds.size(); ++i) {
-                sum = new Multiply(stack.pop(), sum);
+                sum = stack.pop().timeBy(sum);
             }
             stack.push(sum);
         }
@@ -180,14 +226,9 @@ public interface Expression {
             assert adds.size() > 0;
             Expression sum = stack.pop();
             for (int i = 1; i < adds.size(); ++i) {
-                sum = new Plus(stack.pop(), sum);
+                sum = stack.pop().addBy(sum);
             }
-            stack.push(sum);
-            
+            stack.push(sum);    
         }
-
-        
-        
-        
     }
 }
