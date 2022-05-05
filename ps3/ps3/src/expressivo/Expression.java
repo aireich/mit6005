@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -20,11 +21,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import expressivo.parser.ExpressionLexer;
 import expressivo.parser.ExpressionListener;
 import expressivo.parser.ExpressionParser;
-import expressivo.parser.ExpressionParser.AtomContext;
-import expressivo.parser.ExpressionParser.ExpressionContext;
+import expressivo.parser.ExpressionParser.ExprContext;
+import expressivo.parser.ExpressionParser.GroupContext;
 import expressivo.parser.ExpressionParser.MultiplyContext;
+import expressivo.parser.ExpressionParser.NumberContext;
 import expressivo.parser.ExpressionParser.PlusContext;
-import expressivo.parser.ExpressionParser.RootContext;
+import expressivo.parser.ExpressionParser.VariableContext;
 /**
  * An immutable data type representing a polynomial expression of:
  *   + and *
@@ -48,27 +50,29 @@ public interface Expression {
      * @return expression AST for the input
      * @throws IllegalArgumentException if the expression is invalid
      */
-    public static Expression parse(String input) {
-        assert input != null;
-        CharStream stream = new ANTLRInputStream(input);
-        ExpressionLexer lexer = new ExpressionLexer(stream);
-        lexer.reportErrorsAsExceptions();
-        TokenStream tokens = new CommonTokenStream(lexer);
- 
-        ExpressionParser parser = new ExpressionParser(tokens);
-        parser.reportErrorsAsExceptions();
-        ParseTree tree = parser.root();
-        
-     // *** Debugging option #1: print the tree to the console
-        System.err.println(tree.toStringTree(parser));
+    public static Expression parse(String input) throws IllegalArgumentException{
+        try {
+            assert input != null;
+            CharStream stream = new ANTLRInputStream(input);
+            ExpressionLexer lexer = new ExpressionLexer(stream);
+            lexer.reportErrorsAsExceptions();
+            TokenStream tokens = new CommonTokenStream(lexer);
+     
+            ExpressionParser parser = new ExpressionParser(tokens);
+            parser.reportErrorsAsExceptions();
+            ParseTree tree = parser.expr();
+            
+         // *** Debugging option #1: print the tree to the console
+            System.err.println(tree.toStringTree(parser));
 
-        // *** Debugging option #2: show the tree in a window
-//        Trees.inspect(tree, parser);
-        MakeExpression exprMaker = new MakeExpression();
-        new ParseTreeWalker().walk(exprMaker, tree);
-        return exprMaker.getExpression();
-
-
+            // *** Debugging option #2: show the tree in a window
+            Trees.inspect(tree, parser);
+            MakeExpression exprMaker = new MakeExpression();
+            new ParseTreeWalker().walk(exprMaker, tree);
+            return exprMaker.getExpression();
+        } catch(ParseCancellationException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
     
     /** create an empty expression
@@ -109,52 +113,7 @@ public interface Expression {
         public Expression getExpression() {
             return stack.get(0);
         }
-        
-        @Override
-        public void exitExpression(ExpressionContext ctx) {
-        }
-        
-        @Override
-        public void exitAtom(AtomContext ctx) {
-            if (ctx.NUMBER() != null) {
-                // match a Number object
-                String value = ctx.NUMBER().getText();
-                Expression number = new Number(value);
-                stack.push(number);
-            } else if (ctx.VARIABLE() != null) {
-                String value = ctx.VARIABLE().getText();
-                Expression var = new Variable(value);
-                stack.push(var);
-            } else {
-                // matched the '(' expression ')' alternative
-                // do nothing, because expression's value is already on the stack
-            }
-            
-        }
-        
-        @Override
-        public void exitPlus(PlusContext ctx) {
-            List<AtomContext> addends = ctx.atom();
-            Expression atom = stack.pop();
-            
-            for (int i = 1; i < addends.size(); i++) {
-                atom = new Plus(stack.pop(), atom);
-            }
-            
-            stack.push(atom);
-            
-        }
-        
-        @Override
-        public void exitMultiply(MultiplyContext ctx) {
-            List<AtomContext> mulends = ctx.atom();
-            Expression atom = stack.pop();
-            for (int i = 1; i < mulends.size(); i++) {
-                atom = new Multiply(stack.pop(), atom);
-            }
-            stack.push(atom);
-        }
-        
+
         @Override
         public void enterEveryRule(ParserRuleContext arg0) {}
 
@@ -168,22 +127,67 @@ public interface Expression {
         public void visitTerminal(TerminalNode arg0) {}
 
         @Override
-        public void enterRoot(RootContext ctx) {}
+        public void enterGroup(GroupContext ctx) {}
 
         @Override
-        public void exitRoot(RootContext ctx) {}
+        public void exitGroup(GroupContext ctx) {
+            Expression gr = stack.pop();
+            stack.push(new Group(gr));
+        }
 
         @Override
-        public void enterExpression(ExpressionContext ctx) {}
+        public void enterVariable(VariableContext ctx) {}
 
         @Override
-        public void enterAtom(AtomContext ctx) {}
+        public void exitVariable(VariableContext ctx) {
+            String var = ctx.getText();
+            Expression variable = new Variable(var);
+            stack.push(variable);    
+        }
+
+        @Override
+        public void enterNumber(NumberContext ctx) {}
+
+        @Override
+        public void exitNumber(NumberContext ctx) {
+            String value = ctx.getText();
+            Expression num = new Number(value);
+            stack.push(num);  
+        }
+
+        @Override
+        public void enterMultiply(MultiplyContext ctx) {}
+
+        @Override
+        public void exitMultiply(MultiplyContext ctx) {
+            List<ExprContext> adds = ctx.expr();
+            assert stack.size() >= adds.size();
+            assert adds.size() > 0;
+            Expression sum = stack.pop();
+            for (int i = 1; i < adds.size(); ++i) {
+                sum = new Multiply(stack.pop(), sum);
+            }
+            stack.push(sum);
+        }
 
         @Override
         public void enterPlus(PlusContext ctx) {}
 
         @Override
-        public void enterMultiply(MultiplyContext ctx) {}
- 
+        public void exitPlus(PlusContext ctx) {
+            List<ExprContext> adds = ctx.expr();
+            assert stack.size() >= adds.size();
+            assert adds.size() > 0;
+            Expression sum = stack.pop();
+            for (int i = 1; i < adds.size(); ++i) {
+                sum = new Plus(stack.pop(), sum);
+            }
+            stack.push(sum);
+            
+        }
+
+        
+        
+        
     }
 }

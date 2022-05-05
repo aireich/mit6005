@@ -11,53 +11,63 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface ExpressionListener extends ParseTreeListener {
   /**
-   * Enter a parse tree produced by {@link ExpressionParser#root}.
+   * Enter a parse tree produced by the {@code Group}
+   * labeled alternative in {@link ExpressionParser#expr}.
    * @param ctx the parse tree
    */
-  void enterRoot(ExpressionParser.RootContext ctx);
+  void enterGroup(ExpressionParser.GroupContext ctx);
   /**
-   * Exit a parse tree produced by {@link ExpressionParser#root}.
+   * Exit a parse tree produced by the {@code Group}
+   * labeled alternative in {@link ExpressionParser#expr}.
    * @param ctx the parse tree
    */
-  void exitRoot(ExpressionParser.RootContext ctx);
+  void exitGroup(ExpressionParser.GroupContext ctx);
   /**
-   * Enter a parse tree produced by {@link ExpressionParser#expression}.
+   * Enter a parse tree produced by the {@code Variable}
+   * labeled alternative in {@link ExpressionParser#expr}.
    * @param ctx the parse tree
    */
-  void enterExpression(ExpressionParser.ExpressionContext ctx);
+  void enterVariable(ExpressionParser.VariableContext ctx);
   /**
-   * Exit a parse tree produced by {@link ExpressionParser#expression}.
+   * Exit a parse tree produced by the {@code Variable}
+   * labeled alternative in {@link ExpressionParser#expr}.
    * @param ctx the parse tree
    */
-  void exitExpression(ExpressionParser.ExpressionContext ctx);
+  void exitVariable(ExpressionParser.VariableContext ctx);
   /**
-   * Enter a parse tree produced by {@link ExpressionParser#atom}.
+   * Enter a parse tree produced by the {@code Number}
+   * labeled alternative in {@link ExpressionParser#expr}.
    * @param ctx the parse tree
    */
-  void enterAtom(ExpressionParser.AtomContext ctx);
+  void enterNumber(ExpressionParser.NumberContext ctx);
   /**
-   * Exit a parse tree produced by {@link ExpressionParser#atom}.
+   * Exit a parse tree produced by the {@code Number}
+   * labeled alternative in {@link ExpressionParser#expr}.
    * @param ctx the parse tree
    */
-  void exitAtom(ExpressionParser.AtomContext ctx);
+  void exitNumber(ExpressionParser.NumberContext ctx);
   /**
-   * Enter a parse tree produced by {@link ExpressionParser#plus}.
-   * @param ctx the parse tree
-   */
-  void enterPlus(ExpressionParser.PlusContext ctx);
-  /**
-   * Exit a parse tree produced by {@link ExpressionParser#plus}.
-   * @param ctx the parse tree
-   */
-  void exitPlus(ExpressionParser.PlusContext ctx);
-  /**
-   * Enter a parse tree produced by {@link ExpressionParser#multiply}.
+   * Enter a parse tree produced by the {@code Multiply}
+   * labeled alternative in {@link ExpressionParser#expr}.
    * @param ctx the parse tree
    */
   void enterMultiply(ExpressionParser.MultiplyContext ctx);
   /**
-   * Exit a parse tree produced by {@link ExpressionParser#multiply}.
+   * Exit a parse tree produced by the {@code Multiply}
+   * labeled alternative in {@link ExpressionParser#expr}.
    * @param ctx the parse tree
    */
   void exitMultiply(ExpressionParser.MultiplyContext ctx);
+  /**
+   * Enter a parse tree produced by the {@code Plus}
+   * labeled alternative in {@link ExpressionParser#expr}.
+   * @param ctx the parse tree
+   */
+  void enterPlus(ExpressionParser.PlusContext ctx);
+  /**
+   * Exit a parse tree produced by the {@code Plus}
+   * labeled alternative in {@link ExpressionParser#expr}.
+   * @param ctx the parse tree
+   */
+  void exitPlus(ExpressionParser.PlusContext ctx);
 }

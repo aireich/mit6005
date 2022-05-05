@@ -29,13 +29,19 @@ import Configuration;
  * For more information, see reading 18 about parser generators, which explains
  * how to use Antlr and has links to reference information.
  */
-root : expression EOF;
-expression: atom | plus | multiply;
-atom : NUMBER | VARIABLE | '(' expression ')';
-plus : atom '+' atom;
-multiply : atom '*' atom;
-NUMBER : [0-9]+('.'[0-9]+)?;
-VARIABLE : [A-Za-z]+;
+
+
+expr: expr TIME expr  #Multiply
+    | expr ADD expr  #Plus
+    | '(' expr ')'   #Group
+    | NUM            #Number
+    | VAR            #Variable
+    ;  
+NUM : [0-9]+('.'[0-9]+)?;
+VAR : [A-Za-z]+;
+ADD : '+';
+TIME: '*';
+
 
 
 /* Tell Antlr to ignore spaces around tokens. */

@@ -4,7 +4,7 @@ package expressivo;
  * A non-negative decimal number
  *
  */
-public class Number extends Atom implements Expression{
+public class Number implements Expression{
     
     /**
      * Abstract Function:
@@ -17,12 +17,6 @@ public class Number extends Atom implements Expression{
      * private immutable value
      */
     private final double value;
-    
-    @Override
-    public boolean isNumber() {
-        return true;
-    }
-
     
     public Number(String value) {
         this.value = Double.parseDouble(value);

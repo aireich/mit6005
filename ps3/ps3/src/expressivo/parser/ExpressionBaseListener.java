@@ -19,49 +19,37 @@ public class ExpressionBaseListener implements ExpressionListener {
    *
    * <p>The default implementation does nothing.</p>
    */
-  @Override public void enterRoot(ExpressionParser.RootContext ctx) { }
+  @Override public void enterGroup(ExpressionParser.GroupContext ctx) { }
   /**
    * {@inheritDoc}
    *
    * <p>The default implementation does nothing.</p>
    */
-  @Override public void exitRoot(ExpressionParser.RootContext ctx) { }
+  @Override public void exitGroup(ExpressionParser.GroupContext ctx) { }
   /**
    * {@inheritDoc}
    *
    * <p>The default implementation does nothing.</p>
    */
-  @Override public void enterExpression(ExpressionParser.ExpressionContext ctx) { }
+  @Override public void enterVariable(ExpressionParser.VariableContext ctx) { }
   /**
    * {@inheritDoc}
    *
    * <p>The default implementation does nothing.</p>
    */
-  @Override public void exitExpression(ExpressionParser.ExpressionContext ctx) { }
+  @Override public void exitVariable(ExpressionParser.VariableContext ctx) { }
   /**
    * {@inheritDoc}
    *
    * <p>The default implementation does nothing.</p>
    */
-  @Override public void enterAtom(ExpressionParser.AtomContext ctx) { }
+  @Override public void enterNumber(ExpressionParser.NumberContext ctx) { }
   /**
    * {@inheritDoc}
    *
    * <p>The default implementation does nothing.</p>
    */
-  @Override public void exitAtom(ExpressionParser.AtomContext ctx) { }
-  /**
-   * {@inheritDoc}
-   *
-   * <p>The default implementation does nothing.</p>
-   */
-  @Override public void enterPlus(ExpressionParser.PlusContext ctx) { }
-  /**
-   * {@inheritDoc}
-   *
-   * <p>The default implementation does nothing.</p>
-   */
-  @Override public void exitPlus(ExpressionParser.PlusContext ctx) { }
+  @Override public void exitNumber(ExpressionParser.NumberContext ctx) { }
   /**
    * {@inheritDoc}
    *
@@ -74,6 +62,18 @@ public class ExpressionBaseListener implements ExpressionListener {
    * <p>The default implementation does nothing.</p>
    */
   @Override public void exitMultiply(ExpressionParser.MultiplyContext ctx) { }
+  /**
+   * {@inheritDoc}
+   *
+   * <p>The default implementation does nothing.</p>
+   */
+  @Override public void enterPlus(ExpressionParser.PlusContext ctx) { }
+  /**
+   * {@inheritDoc}
+   *
+   * <p>The default implementation does nothing.</p>
+   */
+  @Override public void exitPlus(ExpressionParser.PlusContext ctx) { }
 
   /**
    * {@inheritDoc}

@@ -4,7 +4,7 @@ package expressivo;
  * Representing a case-sensitive variable in an expression
  *
  */
-public class Variable extends Atom implements Expression {
+public class Variable implements Expression {
     /**
      * Abstract Function:
      * AF(String name): a case-sensitive variable
@@ -20,11 +20,6 @@ public class Variable extends Atom implements Expression {
     
     public Variable(String name) {
         this.name = name;
-    }
-    
-    @Override
-    public boolean isVariable() {
-        return true;
     }
     
     private void checkRep() {
